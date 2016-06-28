@@ -1,0 +1,19 @@
+{
+  "name": "mqttpress",
+  "version": "1.0.0",
+  "description": "Serverless API Server emulated by MQTT",
+  "main": "index.js",
+  "scripts": {
+    "test": ""
+  },
+  "keywords": ["mqtt", "serverless", ""],
+  "author": "muddydixon<muddydixon@gmail.com>",
+  "license": "Apache License Version 2.0",
+  "dependencies": {
+    "mqtt": "^1.12.0",
+    "uuid": "^2.0.2"
+  },
+  "devDependencies": {
+    "debug": "^2.2.0"
+  }
+}
