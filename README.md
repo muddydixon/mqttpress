@@ -104,7 +104,7 @@ app.on("connect", ()=>{
 1. replace debug with console.log
 1. mqtt endpoint `mqtt://192.168.99.100:1883` with `ws://192.168.99.100:9001`
 1. browserify / webpack: `$(npm bin)/browserify example/client.js -o example/client-web.js`
-1. open index.html bwllow:
+1. open index.html below:
 
 ```html
 <!doctype html>
