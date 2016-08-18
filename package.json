@@ -9,6 +9,7 @@
   "keywords": ["mqtt", "serverless", ""],
   "author": "muddydixon<muddydixon@gmail.com>",
   "license": "Apache License Version 2.0",
+  "registory": "https://github.com/muddydixon/mqttpress",
   "dependencies": {
     "mqtt": "^1.12.0",
     "uuid": "^2.0.2"
