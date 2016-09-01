@@ -1,20 +1,35 @@
 {
   "name": "mqttpress",
   "version": "1.0.0",
-  "description": "Serverless API Server emulated by MQTT",
+  "description": "Yet another Serverless API Server using MQTT",
   "main": "index.js",
   "scripts": {
-    "test": ""
+    "test": "mocha --require intelli-espower-loader test/**_test.js",
+    "test:coverage": "istanbul cover _mocha test/**_test.js",
+    "build:server": "browserify docs/src/server.js -t [ babelify --presets [ es2015 ] ] -o docs/js/server.js",
+    "build:client": "browserify docs/src/client.js -t [ babelify --presets [ es2015 ] ] -o docs/js/client.js",
+    "build:sample": "npm run build:server && npm run build:client"
   },
-  "keywords": ["mqtt", "serverless", ""],
+  "keywords": [
+    "mqtt",
+    "serverless",
+    "api"
+  ],
   "author": "muddydixon<muddydixon@gmail.com>",
   "license": "Apache License Version 2.0",
-  "registory": "https://github.com/muddydixon/mqttpress",
+  "repository": "https://github.com/muddydixon/mqttpress",
   "dependencies": {
     "mqtt": "^1.12.0",
     "uuid": "^2.0.2"
   },
   "devDependencies": {
-    "debug": "^2.2.0"
+    "babel-preset-es2015": "^6.14.0",
+    "browserify": "^13.1.0",
+    "debug": "^2.2.0",
+    "intelli-espower-loader": "^1.0.1",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.0.2",
+    "power-assert": "^1.4.1",
+    "watchify": "^3.7.0"
   }
 }

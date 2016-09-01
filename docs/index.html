@@ -3,8 +3,155 @@
 	<head>
 		<meta charset="utf8" />
 		<title>MQTTPRESS</title>
+		<link rel="stylesheet" media="all" href="./css/bootstrap.min.css" />
+		<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/styles/default.min.css" />
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
+		<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/highlight.min.js"></script>
 	</head>
 	<body>
-		<h1>MQTTPRESS</h1>
+<a href="https://github.com/muddydixon/mqttpress"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+		<div class="container">
+			<div class="row">
+				<h1>MQTTPRESS</h1>
+				<hr>
+			</div>
+			<div class="row">
+				<p>
+					MQTTPRESS is another Serverless Architecture using MQTT Broker.
+				</p>
+			</div>
+			<div class="row">
+				<div class="panel panel-default">
+					<div class="panel-body">
+						<h4>Overview</h4>
+						<pre><code>+--------+
+|  MQTT  |
++--------+
+ |  |   |
+ |  |   +--------------------------------------+
+ |  |                                          |
+ |  +------------------+                       |
+ |                     |                       |
++---------------+    +-------------------+    +------------------+
+|  Server Page  |    |  Client Page (1)  |    |  Client Page (2) |
++---------------+    +-------------------+    +------------------+
+
+emulates this!
+
++---------------+               +---------------+
+|  Client Page  |------Req----->|  Server Page  |
+|      (1)      |<-----Res------|               |
++---------------+               |               |
+                                |               |
++---------------+               |               |
+|  Client Page  |------Req----->|               |
+|      (2)      |<-----Res------|               |
++---------------+               +---------------+
+						</code></pre>
+					  <p><h4>
+							So you can create webservice only html / javascript<br>using MQTT PaaS such as <a href="http://cloud.nifty.com/service/mqtt.htm">NIFTY Cloud</a>, <a href="https://www.cloudmqtt.com/">CloudMQTT</a> or <a href="https://sango.shiguredo.jp/">Sango</a>.<br>
+						 Deply Server page such as Github pages and open the page on your <strong>`BROWSER`</strong>.
+ 					  </h4></p>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-6">
+					<div class="panel panel-info">
+						<div class="panel-heading">
+							<h3 class="panel-title">Server Side <a target="_blank" href="./server.html">Link <i class="fa fa-link"></i></a></h3>
+						</div>
+						<div class="panel-body">
+							<pre><code class="javascript">const mqttpress = require("mqttpress");
+const config = require("./config");
+const debug = require("debug")("server");
+
+const mqttname = `ws://${config.mqtt.host}:${config.mqtt.ports.ws}`;
+const app = mqttpress();
+
+// add handler #1
+debug(`add handler to ${"news/#"}`);
+app.hear("news/#", (ctx)=>{
+  debug(`hear: ${ctx.topic}, from: ${JSON.stringify(ctx.from)}, data: ${JSON.stringify(ctx.data)}`);
+  ctx.send({msg: `congrat ${ctx.data.winner} win!`});
+});
+
+// add handler #2
+debug(`add handler to ${"project/+/news"}`);
+app.hear("project/+/news", (ctx)=>{
+  debug(`hear: ${ctx.topic}, from: ${JSON.stringify(ctx.from)}, data: ${JSON.stringify(ctx.data)}`);
+  ctx.send({msg: `congrat ${ctx.data.loser} lose!`});
+});
+
+app.on("listening", ()=>{
+  debug(`listening ${app.id} on ${mqttname}`);
+  document.querySelector("#client_page").href = `./client.html?prefix=${prefix}`;
+});
+
+app.on("error", (err)=>{
+  console.error(err.stack);
+});
+
+// listen start
+app.listen(mqttname);
+</code></pre>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="panel panel-danger">
+						<div class="panel-heading">
+							<h3 class="panel-title"><a target="_blank" href="./client.html">Client Side</a></h3>
+						</div>
+						<div class="panel-body">
+							<pre><code class="javascript">const mqttpress = require("mqttpress");
+const config = require("./config");
+const debug = require("debug")("client");
+
+const mqttname = `ws://${config.mqtt.host}:${config.mqtt.ports.ws}`;
+const app = mqttpress();
+
+app.on("connect", ()=>{
+  debug(`connected ${app.id} on ${mqttname}`);
+
+  // request #1
+  debug(`request: news/sports ${JSON.stringify({winner: "tigers"})}`);
+  app.send("news/sports", {winner: "tigers"}).then((data)=>{
+    debug(`response: ${JSON.stringify(data)}`);
+  }).catch((err)=>{
+    console.error(err.stack);
+  });
+
+  // request #2
+  debug(`request: project/sports/news ${JSON.stringify({loser: "giants"})}`);
+  app.send("project/sports/news", {loser: "giants"}).then((data)=>{
+    debug(`response: ${JSON.stringify(data)}`);
+  }).catch((err)=>{
+    console.error(err.stack);
+  });
+});
+
+// connecting
+app.connect(mqttname);
+</code></pre>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<h3>Install</h3>
+				<p>
+					<pre><code class="zsh">% npm install mqttpress</code></pre>
+				</p>
+			</div>
+			<div class="row">
+				<footer>
+					<h4>License</h4>
+					MQTTPRESS is licensed under Apache License Version 2.0.
+				</footer>
+			</div>
+		</div>
+		<!--<script src="./bundle.js"></script>-->
+		<script>hljs.initHighlightingOnLoad();</script>
 	</body>
 </html>

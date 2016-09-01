@@ -1,7 +1,7 @@
 mqttpress
 -----
 
-Serverless API Server emulated by MQTT
+MQTTPRESS is another Serverless Architecture using MQTT Broker.
 
 
 ```
@@ -13,9 +13,9 @@ Serverless API Server emulated by MQTT
  |  |                                          |
  |  +------------------+                       |
  |                     |                       |
-+---------------+    +-------------------+   +------------------+
-|  Server Page  |	 |  Client Page (1)  |	 |  Client Page (2) |
-+---------------+	 +-------------------+	 +------------------+
++---------------+    +-------------------+    +------------------+
+|  Server Page  |    |  Client Page (1)  |    |  Client Page (2) |
++---------------+    +-------------------+    +------------------+
 
 emulates this!
 
@@ -35,9 +35,16 @@ emulates this!
 * node.js (>= 6)
 * mqtt broker (on either your server or cloud like [NIFTY Cloud](http://cloud.nifty.com/service/mqtt.htm) or [CloudMQTT](https://www.cloudmqtt.com/))
 
+## Demo
+
+1. Open [Server Page](https://muddydixon.github.io/mqttpress/server.html)
+1. Click "Client Page" button to open Client page corresponding to the Server Page.
+1. Check console of both pages and click "Request" button.
+
+
 ## How to use
 
-* Docker
+* MQTT on Docker
 
 ```zsh
 % docker run -d -p 1883:1883 -p 9001:9001 --name=mosquitto sourceperl/mosquitto
@@ -46,12 +53,11 @@ emulates this!
 * Server Side
 
 ```js
-"use strict";
-
-const mqttpress = require("../lib/mqttpress");
+const mqttpress = require("mqttpress");
+const config = require("./config");
 const debug = require("debug")("server");
 
-const app = mqttpress("mqtt://192.168.99.100:1883");
+const app = mqttpress();
 
 app.hear("news/#", (res)=>{
   debug(`hear: ${res.topic}, from: ${JSON.stringify(res.from)}, data: ${JSON.stringify(res.data)}`);
@@ -63,26 +69,25 @@ app.hear("project/+/news", (res)=>{
   res.send({msg: `congrat ${res.data.loser} lose!`});
 });
 
-app.listen();
-app.on("connect", ()=>{
+app.on("listening", ()=>{
   debug(`listen ${app.id}`);
 });
 
 app.on("error", (err)=>{
   console.error(err.stack);
 });
+
+app.listen(`ws://${config.mqtt.host}:${config.mqtt.ports.ws}`);
 ```
 
-* Client Side (node)
+* Client Side
 
 ```js
-"use strict";
-
-const mqttpress = require("../lib/mqttpress");
+const mqttpress = require("mqttpress");
+const config = require("./config");
 const debug = require("debug")("client");
 
-const app = mqttpress("mqtt://192.168.99.100:1883");
-app.connect();
+const app = mqttpress();
 app.on("connect", ()=>{
   debug(`connection ready ${app.id}`);
 
@@ -99,29 +104,11 @@ app.on("connect", ()=>{
     console.error(err.stack);
   });
 });
-```
 
-* Client Side (web)
-
-1. replace debug with console.log
-1. mqtt endpoint `mqtt://192.168.99.100:1883` with `ws://192.168.99.100:9001`
-1. browserify / webpack: `$(npm bin)/browserify example/client.js -o example/client-web.js`
-1. open index.html below:
-
-```html
-<!doctype html>
-<html>
-	<head>
-	</head>
-	<body>
-		<script src="./client-web.js"></script>
-	</body>
-</html>
+app.connect(`ws://${config.mqtt.host}:${config.mqtt.ports.ws}`);
 ```
 
 ## TODO
-* test
-* setting prefix for supporting [sango](https://sango.shiguredo.jp/)
 * supporting multiple server response
 
 ## License
