@@ -1,6 +1,6 @@
 {
   "name": "mqttpress",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Yet another Serverless API Server using MQTT",
   "main": "index.js",
   "scripts": {
