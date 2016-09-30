@@ -16,9 +16,10 @@
     "api"
   ],
   "author": "muddydixon<muddydixon@gmail.com>",
-  "license": "Apache License Version 2.0",
+  "license": "Apache-2.0",
   "repository": "https://github.com/muddydixon/mqttpress",
   "dependencies": {
+    "babelify": "^7.3.0",
     "mqtt": "^1.12.0",
     "uuid": "^2.0.2"
   },

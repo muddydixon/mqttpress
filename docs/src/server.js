@@ -1,10 +1,16 @@
 const mqttpress = require("../../");
+const qs = require("querystring");
 const uuid = require("uuid");
 const config = require("./config");
 
 const debug = require("./debug")("server");
 
-const prefix = uuid();
+const getPrefix = ()=>{
+  const query = qs.parse(location.search.slice(1));
+  return query.prefix || undefined;
+};
+
+const prefix = getPrefix() || uuid();
 const mqttname = `${config.mqtt.protocol}://${config.mqtt.host}:${config.mqtt.ports[config.mqtt.protocol]}`;
 const app = mqttpress({prefix});
 
