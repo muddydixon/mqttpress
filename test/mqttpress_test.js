@@ -94,14 +94,17 @@ describe("mqttpress", ()=>{
       const server = mqttpress({prefix});
       const client = mqttpress({prefix});
       server.hear("topic", (ctx)=>{
-        console.log("hear");
+        assert(ctx.id !== null);
+        assert(ctx.from !== null);
+        assert(ctx.topic === "topic");
+        assert(ctx.data === "");
         done();
       });
       server.on("connect", ()=>{
         assert(true);
       });
       server.on("error", (err)=>{
-        console.log("error");
+        assert(err);
         done(new Error("cannot connect endpoint"));
       });
 
