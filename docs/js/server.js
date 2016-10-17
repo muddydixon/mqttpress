@@ -124,7 +124,7 @@ var MQTTPress = function (_EventEmitter) {
   _inherits(MQTTPress, _EventEmitter);
 
   function MQTTPress() {
-    var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
     _classCallCheck(this, MQTTPress);
 
@@ -173,7 +173,7 @@ var MQTTPress = function (_EventEmitter) {
       if (!endpoint || typeof endpoint !== "string") throw new Error("endpoint require");
       var ep = Url.parse(endpoint);
       if (["mqtt:", "mqtts:", "ws:", "wss:"].indexOf(ep.protocol) === -1) throw new Error("endpoint should have one of mqtt, mqtts, ws, wss: actual " + ep.protocol);
-      this._mqtt = mqtt.connect(endpoint);
+      this._mqtt = mqtt.connect(endpoint, this._mqttOpt);
       this._mqtt.on("error", function (err) {
         _this3.emit("error", err);
       });
@@ -208,7 +208,7 @@ var MQTTPress = function (_EventEmitter) {
       if (!endpoint || typeof endpoint !== "string") throw new Error("endpoint require");
       var ep = Url.parse(endpoint);
       if (["mqtt:", "mqtts:", "ws:", "wss:"].indexOf(ep.protocol) === -1) throw new Error("endpoint should have one of mqtt, mqtts, ws, wss: actual " + ep.protocol);
-      this._mqtt = mqtt.connect(endpoint);
+      this._mqtt = mqtt.connect(endpoint, this._mqttOpt);
       this._mqtt.on("error", function (err) {
         _this4.emit("error", err);
       });
@@ -264,7 +264,6 @@ module.exports = mqttpress;
 },{"debug":12,"events":23,"mqtt":34,"url":69,"uuid":75}],6:[function(require,module,exports){
 'use strict'
 
-exports.byteLength = byteLength
 exports.toByteArray = toByteArray
 exports.fromByteArray = fromByteArray
 
@@ -272,17 +271,23 @@ var lookup = []
 var revLookup = []
 var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array
 
-var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-for (var i = 0, len = code.length; i < len; ++i) {
-  lookup[i] = code[i]
-  revLookup[code.charCodeAt(i)] = i
+function init () {
+  var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+  for (var i = 0, len = code.length; i < len; ++i) {
+    lookup[i] = code[i]
+    revLookup[code.charCodeAt(i)] = i
+  }
+
+  revLookup['-'.charCodeAt(0)] = 62
+  revLookup['_'.charCodeAt(0)] = 63
 }
 
-revLookup['-'.charCodeAt(0)] = 62
-revLookup['_'.charCodeAt(0)] = 63
+init()
 
-function placeHoldersCount (b64) {
+function toByteArray (b64) {
+  var i, j, l, tmp, placeHolders, arr
   var len = b64.length
+
   if (len % 4 > 0) {
     throw new Error('Invalid string. Length must be a multiple of 4')
   }
@@ -292,19 +297,9 @@ function placeHoldersCount (b64) {
   // represent one byte
   // if there is only one, then the three characters before it represent 2 bytes
   // this is just a cheap hack to not do indexOf twice
-  return b64[len - 2] === '=' ? 2 : b64[len - 1] === '=' ? 1 : 0
-}
+  placeHolders = b64[len - 2] === '=' ? 2 : b64[len - 1] === '=' ? 1 : 0
 
-function byteLength (b64) {
   // base64 is 4/3 + up to two characters of the original data
-  return b64.length * 3 / 4 - placeHoldersCount(b64)
-}
-
-function toByteArray (b64) {
-  var i, j, l, tmp, placeHolders, arr
-  var len = b64.length
-  placeHolders = placeHoldersCount(b64)
-
   arr = new Arr(len * 3 / 4 - placeHolders)
 
   // if there are placeholders, only get up to the last complete 4 chars
@@ -5522,26 +5517,22 @@ if (typeof Object.create === 'function') {
 }
 
 },{}],26:[function(require,module,exports){
-/*!
- * Determine if an object is a Buffer
+/**
+ * Determine if an object is Buffer
  *
- * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
- * @license  MIT
+ * Author:   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+ * License:  MIT
+ *
+ * `npm install is-buffer`
  */
 
-// The _isBuffer check is for Safari 5-7 support, because it's missing
-// Object.prototype.constructor. Remove this eventually
 module.exports = function (obj) {
-  return obj != null && (isBuffer(obj) || isSlowBuffer(obj) || !!obj._isBuffer)
-}
-
-function isBuffer (obj) {
-  return !!obj.constructor && typeof obj.constructor.isBuffer === 'function' && obj.constructor.isBuffer(obj)
-}
-
-// For Node v0.10 support. Remove this eventually.
-function isSlowBuffer (obj) {
-  return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
+  return !!(obj != null &&
+    (obj._isBuffer || // For Safari 5-7 (missing Object.prototype.constructor)
+      (obj.constructor &&
+      typeof obj.constructor.isBuffer === 'function' &&
+      obj.constructor.isBuffer(obj))
+    ))
 }
 
 },{}],27:[function(require,module,exports){
