@@ -134,6 +134,7 @@ var MQTTPress = function (_EventEmitter) {
     _this._mqtt = null;
     _this._handlers = {};
     _this._mqttOpt = opts;
+    _this._isStarted = false;
     return _this;
   }
 
@@ -142,6 +143,8 @@ var MQTTPress = function (_EventEmitter) {
     value: function _startListen() {
       var _this2 = this;
 
+      if (this._isStarted) return null;
+      this._isStarted = true;
       this._mqtt.on("message", function (topic, message) {
         debug("recv: " + topic + ", " + message + " " + JSON.stringify(_this2._handlers));
         var topicArr = topic.split("/");
